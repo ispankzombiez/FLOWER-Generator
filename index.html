@@ -130,7 +130,14 @@
           video.muted = false;
           video.volume = 1;
 
-          await video.play();
+          try {
+            await video.play();
+          } catch {
+            // Most browsers block autoplay with sound; retry muted so playback still starts.
+            video.muted = true;
+            await video.play();
+          }
+
           hideFallback();
           await tryFullscreen();
         } catch {
