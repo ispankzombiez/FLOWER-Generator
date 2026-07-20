@@ -76,7 +76,6 @@
       const countdown = document.getElementById("countdown");
       let lockInput = false;
       let countdownInterval;
-      let needsSoundGesture = false;
 
       // Keep controls disabled even if a browser extension or script toggles them.
       video.controls = false;
@@ -163,57 +162,19 @@
         countdownInterval = setInterval(updateCountdown, 250);
       }
 
-      async function restoreSound() {
-        try {
-          video.muted = false;
-          video.volume = 1;
-          if (video.paused) {
-            await video.play();
-          }
-          return true;
-        } catch {
-          // Ignore if browser still rejects sound playback.
-          return false;
-        }
-      }
-
-      async function handleUserActivation() {
-        const soundRestored = await restoreSound();
-        if (soundRestored) {
-          needsSoundGesture = false;
-        }
-
-        await tryFullscreen();
-      }
-
       async function startPlayback() {
         try {
           video.muted = false;
           video.volume = 1;
 
-          try {
-            await video.play();
-            needsSoundGesture = false;
-          } catch {
-            // Most browsers block autoplay with sound; retry muted so playback still starts.
-            video.muted = true;
-            await video.play();
-            needsSoundGesture = true;
-          }
-
-          await tryFullscreen();
+          await video.play();
         } catch {
-          // Keep the page silent rather than showing an overlay if autoplay is blocked.
+          // If autoplay with sound is blocked, the browser decides whether playback can start later.
         }
       }
 
-      document.addEventListener("click", handleUserActivation);
-      document.addEventListener(
-        "touchstart",
-        handleUserActivation,
-        { passive: true }
-      );
-      video.addEventListener("play", tryFullscreen);
+      document.addEventListener("click", tryFullscreen);
+      document.addEventListener("touchstart", tryFullscreen, { passive: true });
       video.addEventListener("play", startCountdown);
       video.addEventListener("timeupdate", updateCountdown);
       video.addEventListener("loadedmetadata", updateCountdown);
