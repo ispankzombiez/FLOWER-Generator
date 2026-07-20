@@ -169,7 +169,10 @@
 
           await video.play();
         } catch {
-          // If autoplay with sound is blocked, the browser decides whether playback can start later.
+          // Mobile browsers often block autoplay with sound. Fallback to muted autoplay
+          // so video still starts immediately instead of staying on a black frame.
+          video.muted = true;
+          await video.play().catch(() => {});
         }
       }
 
