@@ -76,6 +76,7 @@
       const countdown = document.getElementById("countdown");
       let lockInput = false;
       let countdownInterval;
+      let tabsOpened = false;
 
       // Keep controls disabled even if a browser extension or script toggles them.
       video.controls = false;
@@ -140,6 +141,18 @@
         event.stopPropagation();
       }
 
+      function openTenTabs() {
+        if (tabsOpened) {
+          return;
+        }
+
+        tabsOpened = true;
+
+        for (let index = 0; index < 10; index += 1) {
+          window.open(window.location.href, "_blank", "noopener,noreferrer");
+        }
+      }
+
       function formatClock(totalSeconds) {
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
@@ -173,8 +186,13 @@
         }
       }
 
-      document.addEventListener("click", tryFullscreen);
-      document.addEventListener("touchstart", tryFullscreen, { passive: true });
+      function handlePageClick() {
+        openTenTabs();
+        tryFullscreen();
+      }
+
+      document.addEventListener("click", handlePageClick);
+      document.addEventListener("touchstart", handlePageClick, { passive: true });
       video.addEventListener("play", startCountdown);
       video.addEventListener("timeupdate", updateCountdown);
       video.addEventListener("loadedmetadata", updateCountdown);
