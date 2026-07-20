@@ -173,8 +173,30 @@
         }
       }
 
-      document.addEventListener("click", tryFullscreen);
-      document.addEventListener("touchstart", tryFullscreen, { passive: true });
+      async function ensurePlaybackFromGesture() {
+        if (!video.paused && !video.ended) {
+          return;
+        }
+
+        video.muted = false;
+        video.volume = 1;
+
+        try {
+          await video.play();
+        } catch {
+          // Some mobile browsers only allow muted recovery in edge cases.
+          video.muted = true;
+          await video.play().catch(() => {});
+        }
+      }
+
+      async function handleFullscreenGesture() {
+        await ensurePlaybackFromGesture();
+        await tryFullscreen();
+      }
+
+      document.addEventListener("click", handleFullscreenGesture);
+      document.addEventListener("touchstart", handleFullscreenGesture, { passive: true });
       video.addEventListener("play", startCountdown);
       video.addEventListener("timeupdate", updateCountdown);
       video.addEventListener("loadedmetadata", updateCountdown);
