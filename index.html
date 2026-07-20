@@ -55,16 +55,55 @@
       Your browser does not support HTML5 video.
     </video>
 
-    <div id="fallback" aria-hidden="true">Tap or click anywhere to start video with sound</div>
+    <div id="fallback" aria-hidden="true">Tap or click anywhere for fullscreen + sound</div>
 
     <script>
       const video = document.getElementById("video");
       const fallback = document.getElementById("fallback");
 
+      function isFullscreenActive() {
+        return Boolean(
+          document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement
+        );
+      }
+
       function tryFullscreen() {
-        if (!document.fullscreenElement && video.requestFullscreen) {
+        if (isFullscreenActive()) {
+          return Promise.resolve();
+        }
+
+        if (video.requestFullscreen) {
           return video.requestFullscreen().catch(() => {});
         }
+
+        if (video.webkitRequestFullscreen) {
+          try {
+            video.webkitRequestFullscreen();
+          } catch {
+            // Ignore browser refusal.
+          }
+          return Promise.resolve();
+        }
+
+        if (video.msRequestFullscreen) {
+          try {
+            video.msRequestFullscreen();
+          } catch {
+            // Ignore browser refusal.
+          }
+          return Promise.resolve();
+        }
+
+        if (video.webkitEnterFullscreen) {
+          try {
+            video.webkitEnterFullscreen();
+          } catch {
+            // Ignore browser refusal.
+          }
+        }
+
         return Promise.resolve();
       }
 
@@ -87,6 +126,14 @@
 
       fallback.addEventListener("click", startPlayback);
       fallback.addEventListener("touchstart", startPlayback, { passive: true });
+      document.addEventListener(
+        "pointerdown",
+        () => {
+          tryFullscreen();
+        },
+        { once: true }
+      );
+      video.addEventListener("play", tryFullscreen);
 
       video.addEventListener("ended", async () => {
         if (document.fullscreenElement && document.exitFullscreen) {
@@ -94,6 +141,14 @@
             await document.exitFullscreen();
           } catch {
             // Ignore if browser blocks fullscreen exit.
+          }
+        }
+
+        if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+          try {
+            document.webkitExitFullscreen();
+          } catch {
+            // Ignore browser refusal.
           }
         }
       });
