@@ -195,6 +195,11 @@
           video.volume = 1;
           await video.play();
 
+          const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+          if (isMobile && !document.userActivation.hasBeenActive) {
+            throw new Error("Mobile requires a user gesture for reliable audio output");
+          }
+
           // Treat autoplay as successful only if media is actively running unmuted.
           if (!video.paused && !video.ended && !video.muted && video.volume > 0) {
             // Brave mobile can report unmuted playback while audio output is still blocked.
