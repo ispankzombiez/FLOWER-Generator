@@ -128,7 +128,7 @@
 
       #countdown {
         position: absolute;
-        top: 1rem;
+        bottom: 1rem;
         left: 50%;
         z-index: 30;
         transform: translateX(-50%);
@@ -274,12 +274,12 @@
 
       function updateCountdown() {
         if (!Number.isFinite(video.duration) || video.duration <= 0) {
-          countdown.textContent = "until you can escape --:--";
+          countdown.textContent = "--:-- until you can escape";
           return;
         }
 
         const remaining = Math.max(0, Math.ceil(video.duration - video.currentTime));
-        countdown.textContent = `until you can escape ${formatClock(remaining)}`;
+        countdown.textContent = `${formatClock(remaining)} until you can escape`;
       }
 
       function startCountdown() {
@@ -370,7 +370,7 @@
 
       video.addEventListener("ended", async () => {
         clearInterval(countdownInterval);
-        countdown.textContent = "until you can escape 00:00";
+        countdown.textContent = "00:00 until you can escape";
         countdown.hidden = true;
         countdown.setAttribute("aria-hidden", "true");
         document.body.classList.remove("started");
